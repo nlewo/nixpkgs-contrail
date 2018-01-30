@@ -61,7 +61,7 @@ pkgs // {
     webui  = callPackage ./test/webui.nix { pkgs_path = nixpkgs; contrailPkgs = self; };
   };
 
-  vms = callPackages ./tools/build-vms.nix { contrailPkgs = self; pkgs_path = nixpkgs;};
+  vms = callPackages ./tools/compute-node.nix { contrailPkgs = self; pkgs_path = nixpkgs;};
 
   tools.contrailIntrospectCli = callPackage ./tools/contrail-introspect-cli {};
   tools.contrailApiCliWithExtra = callPackage ./tools/contrail-api-cli {};
