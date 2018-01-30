@@ -47,6 +47,13 @@ in {
         type = types.bool;
         default = false;
       };
+      configurationFilepath = mkOption {
+        type = types.str;
+        default = "";
+        description = ''To specify a alternative configuration
+          filepath. The generated configuration file is no longer
+          used.'';
+      };
       provisionning = mkOption {
         type = types.bool;
         default = true;
@@ -73,6 +80,11 @@ in {
         type = types.str;
         default = "127.0.0.1";
       };
+      contrailInterface = mkOption {
+        type = types.str;
+        default = "eth0";
+        description = "Physical interface name to which virtual host interface maps to";
+      };
     };
   };
 
@@ -86,13 +98,26 @@ in {
       contrailPkgs.vrouterNetns
     ];
     
+    # This is to prevent the netns-daemon-start to update resolv.conf
+    # (since it is using dhclient).
+    environment.etc.dhclient-enter-hooks = {
+      text = ''
+        #!/bin/sh
+        make_resolv_conf() {
+        echo "doing nothing to resolv.conf"
+        }'';
+      mode = "0555";
+    };
+
     systemd.services.contrailVrouterAgent = {
       wantedBy = [ "multi-user.target" ];
       after = [
         "network.target"
         (mkIf cfg.provisionning "contrailApi.service") ];
       preStart = "mkdir -p /var/log/contrail/";
-      script = "${contrailPkgs.vrouterAgent}/bin/contrail-vrouter-agent --config_file ${agent}";
+      script = if cfg.configurationFilepath == ""
+        then "${contrailPkgs.vrouterAgent}/bin/contrail-vrouter-agent --config_file ${agent}"
+        else "${contrailPkgs.vrouterAgent}/bin/contrail-vrouter-agent --config_file ${cfg.configurationFilepath}";
       postStart = mkIf cfg.provisionning "${contrailPkgs.configUtils}/bin/provision_vrouter.py  --api_server_ip ${cfg.apiHost} --api_server_port 8082 --oper add --host_name machine --host_ip 192.168.1.1";
     };
 
@@ -101,12 +126,26 @@ in {
       serviceConfig.RemainAfterExit = true;
       wantedBy = [ "multi-user.target" ];
       after = [ "network.target" ];
+      before = [ "contrailVrouterAgent.service" ];
       path = [ pkgs.iproute contrailPkgs.vrouterUtils ];
       script = ''
-        vif --create vhost0 --mac $(cat /sys/class/net/eth1/address)
-        vif --add vhost0 --mac $(cat /sys/class/net/eth1/address) --vrf 0 --xconnect eth1 --type vhost
-        vif --add eth1 --mac $(cat /sys/class/net/eth0/address) --vrf 0 --vhost-phys --type physical
+        set -x
+        sleep 2
+        CONTRAIL_INTERFACE=${cfg.contrailInterface}
+        vif --create vhost0 --mac $(cat /sys/class/net/$CONTRAIL_INTERFACE/address)
+        vif --add $CONTRAIL_INTERFACE --mac $(cat /sys/class/net/$CONTRAIL_INTERFACE/address) --vrf 0 --vhost-phys --type physical
+        vif --add vhost0 --mac $(cat /sys/class/net/$CONTRAIL_INTERFACE/address) --vrf 0 --xconnect $CONTRAIL_INTERFACE --type vhost
         ip link set vhost0 up
+
+        # Warning, this doesn't work if a default route is installed
+        # on the CONTRAIL_INTERFACE.
+        ROUTE=$(ip r | grep $CONTRAIL_INTERFACE | sed 's/\(.*\) dev.*/\1/')
+        IP=$(ip a show $CONTRAIL_INTERFACE | grep "inet "| sed 's/.*inet \(.*\) scope.*/\1/')
+        ip a del $IP dev $CONTRAIL_INTERFACE
+        ip a add $IP dev vhost0
+        ip r del $ROUTE dev $CONTRAIL_INTERFACE || true
+        ip r add $ROUTE dev vhost0
+        sleep 1
       '';
     };
   };
