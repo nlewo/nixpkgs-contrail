@@ -251,7 +251,11 @@ rec {
       docker netaddr vrouterApi eventlet vnc_api cfgm_common
     ];
     makeWrapperArgs = [
-      "--prefix PATH : ${pkgs.iptables}/bin:${pkgs.procps}/bin:${pkgs.nettools}/bin:${pkgs.iproute}/bin:${pkgs.sudo}/bin"
+      # FIXME: can't use sudo from nix:
+      # sudo: error in /etc/sudo.conf, line 0 while loading plugin "sudoers_policy"
+      # sudo: /nix/store/sq341cfimmyq5mn6fyb25z8nndqsdrp6-sudo-1.8.22/libexec/sudo/sudoers.so must be owned by uid 0
+      # sudo: fatal error, unable to load plugins'
+      "--prefix PATH : ${pkgs.iptables}/bin:${pkgs.procps}/bin:${pkgs.nettools}/bin:${pkgs.iproute}/bin"
     ];
   };
 
