@@ -67,7 +67,7 @@ in {
     systemd.services.zookeeper = {
       preStart = optionalString (cfg.zookeeperDumpPath != null) ''
         mkdir -p /var/lib/zookeeper/version-2/
-        cp ${cfg.zookeeperDumpPath}/* /var/lib/zookeeper/version-2/
+        cp ${cfg.zookeeperDumpPath}/* /var/lib/zookeeper/version-2/ || true
         chown -R zookeeper:nogroup /var/lib/zookeeper/version-2/
       '';
     };
