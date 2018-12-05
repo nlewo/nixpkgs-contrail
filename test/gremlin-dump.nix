@@ -17,6 +17,10 @@ let
       services.openssh.extraConfig = "PermitEmptyPasswords yes";
       users.extraUsers.root.password = "";
 
+      virtualisation = {
+        memorySize = 2048;
+      };
+
       contrail.databaseLoader = {
         enable = true;
         inherit cassandraDumpPath;

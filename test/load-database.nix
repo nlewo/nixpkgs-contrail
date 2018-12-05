@@ -18,6 +18,8 @@ let
     config = {
       _module.args = { inherit pkgs contrailPkgs; };
 
+      virtualisation = { memorySize = 8096; cores = 2; };
+
       services.openssh.enable = true;
       services.openssh.permitRootLogin = "yes";
       services.openssh.extraConfig = "PermitEmptyPasswords yes";
@@ -27,16 +29,18 @@ let
         contrailApiCliWithExtra
       ];
 
-      contrail.databaseLoader = {
-        enable = true;
-        inherit cassandraDumpPath;
+      contrail = {
+        api.enable = true;
+        schemaTransformer.enable = true;
+        databaseLoader = {
+          enable = true;
+          inherit cassandraDumpPath;
+        };
       };
-
-      contrail.api.enable = true;
-      contrail.schemaTransformer.enable = true;
 
       # Don't timeout when loading big DBs
       systemd.services.contrail-api.serviceConfig.TimeoutStartSec = "infinity";
+
     };
   };
 
