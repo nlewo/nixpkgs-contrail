@@ -1,24 +1,34 @@
 { pkgs
 , stdenv
 , contrailVersion
-, contrailBuildInputs
 , contrailWorkspace
-, isContrailMaster }:
+, isContrailMaster
+, thrift
+, boost
+, log4cplus
+, tbb
+}:
+
+with pkgs.lib;
 
 stdenv.mkDerivation rec {
   name = "contrail-control-${version}";
   version = contrailVersion;
   src = contrailWorkspace;
+  buildInputs = with pkgs; [
+    scons libxml2 libtool flex_2_5_35 bison curl
+    vim # to get xxd binary required by sandesh
+    thrift boost log4cplus tbb
+    pythonPackages.lxml
+  ] ++ (optional isContrailMaster [
+    cmake rabbitmq-c gperftools
+  ]);
   USER = "contrail";
   # Only required on master
   dontUseCmakeConfigure = true;
-
-  buildInputs = with pkgs;
-    contrailBuildInputs ++
-    (pkgs.lib.optional isContrailMaster [ cmake rabbitmq-c gperftools ]);
-
+  NIX_CFLAGS_COMPILE = "-isystem ${thrift}/include/thrift";
   buildPhase = ''
-    scons -j1 --optimization=production contrail-control
+    scons -j2 --optimization=production contrail-control
   '';
   installPhase = ''
     mkdir -p $out/{bin,etc/contrail}
