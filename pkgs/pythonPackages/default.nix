@@ -1,4 +1,5 @@
 { pkgs
+, python
 , pythonPackages
 , contrailVersion
 , contrailWorkspace
@@ -31,6 +32,16 @@ let
           url = "mirror://pypi/t/thrift/${name}.tar.gz";
           sha256 = "dfbc3d3bd19d396718dab05abaf46d93ae8005e2df798ef02e32793cd963877e";
         };
+      });
+      # for cassandra-driver
+      cython = super.cython.overridePythonAttrs(old: rec {
+        pname = "Cython";
+        version = "0.28.3";
+        src = self.fetchPypi {
+          inherit pname version;
+          sha256 = "1aae6d6e9858888144cea147eb5e677830f45faaff3d305d77378c3cba55f526";
+        };
+        checkPhase = "";
       });
       bottle = callPackage ./bottle.nix { };
       pycassa = callPackage ./pycassa.nix { };

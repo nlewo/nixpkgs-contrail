@@ -104,9 +104,9 @@ in {
   };
 
   config = mkIf cfg.enable {
-    boot.extraModulePackages = [ contrailPkgs.vrouterModuleNixos_4_9 ];
+    boot.extraModulePackages = [ contrailPkgs.vrouterModuleNixos_4_19 ];
     boot.kernelModules = [ "vrouter" ];
-    boot.kernelPackages = pkgs.linuxPackages_4_9;
+    boot.kernelPackages = pkgs.linuxPackages_4_19;
 
     environment.systemPackages = with contrailPkgs; [
       vrouterPortControl vrouterUtils vrouterNetNs

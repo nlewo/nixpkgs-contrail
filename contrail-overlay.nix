@@ -154,7 +154,7 @@ let
     vrouterUtils = addCacheOutput (callPackage ./pkgs/vrouter-utils.nix { });
     vrouterPortControl = callPackage ./pkgs/vrouter-port-control.nix { };
     vrouterNetNs = callPackage ./pkgs/vrouter-netns.nix { };
-    vrouterModuleNixos_4_9 = addCacheOutput (lself.lib.buildVrouter self.linuxPackages_4_9.kernel.dev);
+    vrouterModuleNixos_4_19 = addCacheOutput (lself.lib.buildVrouter self.linuxPackages_4_19.kernel.dev);
 
     # config
     apiServer = callPackage ./pkgs/api-server.nix { };
