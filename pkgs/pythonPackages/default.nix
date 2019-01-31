@@ -24,6 +24,14 @@ let
           sha256 = "0bbbjvi423y9k9xagrcsimnayaqymg6f2dj76m9z3mjpkjpci4a7";
         };
       });
+      thrift = super.thrift.overridePythonAttrs(old: rec {
+        name = "thrift-${version}";
+        version = "0.9.3";
+        src = pkgs.fetchurl {
+          url = "mirror://pypi/t/thrift/${name}.tar.gz";
+          sha256 = "dfbc3d3bd19d396718dab05abaf46d93ae8005e2df798ef02e32793cd963877e";
+        };
+      });
       bottle = callPackage ./bottle.nix { };
       pycassa = callPackage ./pycassa.nix { };
       kafka = callPackage ./kafka.nix { };
