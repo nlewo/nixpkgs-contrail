@@ -3,7 +3,7 @@
 , mode
 }:
 
-with import (pkgs.path + /nixos/lib/testing.nix) { system = builtins.currentSystem; };
+with import (pkgs.path + /nixos/lib/testing.nix) { inherit pkgs; system = builtins.currentSystem; };
 with pkgs.lib;
 assert (mode == "udp" || mode == "tcp");
 
@@ -15,7 +15,6 @@ let
     imports = [ ../modules/all-in-one.nix ];
 
     config = {
-      # include pkgs to have access to tools overlay
       _module.args = { inherit pkgs contrailPkgs; };
 
       virtualisation = { memorySize = 4096; cores = 2; };
