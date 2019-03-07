@@ -1,12 +1,8 @@
 { stdenv
 , pkgs
+, deps
 , contrailVersion
 , contrailWorkspace
-, boost
-, thrift
-, log4cplus
-, tbb
-, cassandraCppDriver
 }:
 
 stdenv.mkDerivation rec {
@@ -16,16 +12,19 @@ stdenv.mkDerivation rec {
   buildInputs = with pkgs; [
     scons libxml2 libtool flex_2_5_35 bison curl
     vim # to get xxd binary required by sandesh
-    boost thrift log4cplus tbb cassandraCppDriver
+    deps.boost deps.thrift deps.log4cplus deps.tbb
+    deps.cassandraCppDriver
   ];
   USER = "contrail";
-  NIX_CFLAGS_COMPILE = "-isystem ${thrift}/include/thrift";
+  NIX_CFLAGS_COMPILE = "-isystem ${deps.thrift}/include/thrift";
+  separateDebugInfo = true;
   buildPhase = ''
     scons -j2 --optimization=production contrail-query-engine
   '';
   installPhase = ''
     mkdir -p $out/{bin,etc/contrail}
-    cp build/production/query_engine/qed $out/bin/
+    cp build/production/query_engine/qed $out/bin/contrail-query-engine
     cp ${contrailWorkspace}/controller/src/query_engine/contrail-query-engine.conf $out/etc/contrail/
+    cp -r build/lib $out/
   '';
 }

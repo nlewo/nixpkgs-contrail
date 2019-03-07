@@ -1,12 +1,9 @@
 { pkgs
 , stdenv
+, deps
 , contrailVersion
 , contrailWorkspace
-, isContrailMaster
-, thrift
-, boost
-, log4cplus
-, tbb
+, isContrail41
 }:
 
 with pkgs.lib;
@@ -18,15 +15,15 @@ stdenv.mkDerivation rec {
   buildInputs = with pkgs; [
     scons libxml2 libtool flex_2_5_35 bison curl
     vim # to get xxd binary required by sandesh
-    thrift boost log4cplus tbb
+    deps.thrift deps.boost deps.log4cplus deps.tbb
     pythonPackages.lxml
-  ] ++ (optional isContrailMaster [
-    cmake rabbitmq-c gperftools
+  ] ++ (optional isContrail41 [
+    gperftools deps.cassandraCppDriver deps.simpleAmqpClient
+    rabbitmq-c
   ]);
   USER = "contrail";
-  # Only required on master
-  dontUseCmakeConfigure = true;
-  NIX_CFLAGS_COMPILE = "-isystem ${thrift}/include/thrift";
+  NIX_CFLAGS_COMPILE = "-isystem ${deps.thrift}/include/thrift";
+  separateDebugInfo = true;
   buildPhase = ''
     scons -j2 --optimization=production contrail-control
   '';
@@ -34,6 +31,7 @@ stdenv.mkDerivation rec {
     mkdir -p $out/{bin,etc/contrail}
     cp build/production/control-node/contrail-control $out/bin/
     cp ${contrailWorkspace}/controller/src/control-node/contrail-control.conf $out/etc/contrail/
+    cp -r build/lib $out/
   '';
 }
 
