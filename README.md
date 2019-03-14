@@ -61,21 +61,20 @@ $ nix-build -A contrail32.control
 
 ### Run basic tests
 
-```
-$ nix-build -A contrail32.test.allInOne
-```
+The tests are implemented using the [NixOS testing framework](https://nixos.org/nixos/manual/index.html#sec-nixos-tests). 
+Essentially the tests will boot a server inside QEMU, deploy and start OpenContrail and execute a sequence of commands and
+assertions to test if the setup is working as expected. The tests can be executed as follows for the respective OpenContrail version:
 
-The `allInOne` test creates a virtual machine and deploys several
-OpenContrail components. It then checks services provisioning
-(discovery, bgp peering,...), associates ports to `net namespaces` and
-validates ping is working.
-
-
-To run all tests
 ```
 $ nix-build -A contrail32.test
+$ nix-build -A contrail41.test
+$ nix-build -A contrail50.test
 ```
 
+These `test` attribute will execute all tests generating a lot of output
+in the process. Each test execution will yield a `result` output link
+containing a `log.html` file which contains a pretty-printed overview
+of the test.
 
 #### Build and run an all-in-one VM
 
@@ -84,7 +83,17 @@ $ nix-build -A contrail32.test.allInOne.driver
 $ ./result/bin/nixos-run-vms
 
 ```
+If you need ssh access this is also possible:
 
+```
+$ nix-build -A contrail32.test.allInOne.driver
+$ QEMU_NET_OPTS="hostfwd=tcp::2222-:22" result/bin/nixos-run-vms
+
+$ ssh -p 2222 root@localhost
+Password: root
+```
+
+Please refer to the [NixOS manual](https://nixos.org/nixos/manual/index.html#sec-nixos-tests) for more details.
 
 ### Using `nix-shell` to locally compile `contrail-control`
 
