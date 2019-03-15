@@ -65,7 +65,7 @@ The tests are implemented using the [NixOS testing framework](https://nixos.org/
 Essentially the tests will boot a server inside QEMU, deploy and start OpenContrail and execute a sequence of commands and
 assertions to test if the setup is working as expected. The following test cases are available:
 
-- [`allInOne`](./test/all-in-one.nix): Starts all OpenContrail services, creates networks and ports through the API and performs a simple traffic test.
+- [`allInOne`](./test/all-in-one.nix): Starts OpenContrail services, creates networks and ports and performs a simple traffic test.
 - [`tcpFlow`](./test/flows.nix): Generates TCP traffic and checks if the traffic is behaving according to the configured security groups.
 - [`udpFlow`](./test/flows.nix): Generates UDP traffic and checks if the traffic is behaving according to the configured security groups.
 
