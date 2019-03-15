@@ -63,18 +63,24 @@ $ nix-build -A contrail32.control
 
 The tests are implemented using the [NixOS testing framework](https://nixos.org/nixos/manual/index.html#sec-nixos-tests). 
 Essentially the tests will boot a server inside QEMU, deploy and start OpenContrail and execute a sequence of commands and
-assertions to test if the setup is working as expected. The tests can be executed as follows for the respective OpenContrail version:
+assertions to test if the setup is working as expected. The following test cases are available:
+
+- `allInOne`: Starts all OpenContrail services, creates networks and ports through the API and performs a simple traffic test.
+- `tcpFlow`: Generates TCP traffic and checks if the traffic is behaving according to the configured security groups.
+- `udpFlow`: Generates UDP traffic and checks if the traffic is behaving according to the configured security groups.
+
+All of the tests above can be executed as follows for any of the supported OpenContrail versions:
 
 ```
-$ nix-build -A contrail32.test
-$ nix-build -A contrail41.test
-$ nix-build -A contrail50.test
+$ nix-build -A contrail32.test.allInOne
+$ nix-build -A contrail41.test.udpFlow
+$ nix-build -A contrail50.test.tcpFlow
 ```
 
-These `test` attribute will execute all tests generating a lot of output
-in the process. Each test execution will yield a `result` output link
-containing a `log.html` file which contains a pretty-printed overview
-of the test.
+
+Apart from generating a lot of output on the terminal, each test execution will also
+ceate a `result` output link containing a `log.html` file which contains a pretty-printed 
+overview of the test.
 
 #### Build and run an all-in-one VM
 
