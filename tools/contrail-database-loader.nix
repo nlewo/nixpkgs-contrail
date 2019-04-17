@@ -24,6 +24,8 @@ let
     config = {
       _module.args = { inherit pkgs contrailPkgs; };
 
+      virtualisation = { memorySize = 8096; cores = 2; };
+
       contrail = {
 
         allInOne = {

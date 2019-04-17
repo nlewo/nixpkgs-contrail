@@ -49,7 +49,6 @@ in {
     };
 
     imports = [
-      ./cassandra.nix
       ./contrail-vrouter-agent.nix
       ./contrail-api.nix
       ./contrail-schema-transformer.nix

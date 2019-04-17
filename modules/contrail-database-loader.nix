@@ -11,7 +11,6 @@ let
     field_size_limit = 1000000000
   '';
 in {
-  imports = [ ./cassandra.nix ];
   options = {
     contrail.databaseLoader = {
       enable = mkOption {
@@ -30,11 +29,13 @@ in {
     };
   };
 
+  imports = [ ./cassandra.nix ];
+
   config = {
-    virtualisation = { memorySize = 8096; cores = 2; };
-    cassandra = {
-      enable = true;
-      postStart = ''
+
+    systemd.services.cassandra = {
+      path = [ config.services.cassandra.package ];
+      postStart = mkAfter ''
         cat ${cfg.cassandraDumpPath}/schema.cql | grep -v caching | sed "s|'replication_factor': '3'|'replication_factor': '1'|" | cqlsh
 
         load_table() {
@@ -60,10 +61,12 @@ in {
         done
       '';
     };
+
     services.zookeeper = {
       enable = true;
       dataDir = "/var/lib/zookeeper";
     };
+
     systemd.services.zookeeper = {
       preStart = optionalString (cfg.zookeeperDumpPath != null) ''
         mkdir -p /var/lib/zookeeper/version-2/

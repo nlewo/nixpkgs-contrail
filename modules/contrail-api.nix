@@ -43,9 +43,12 @@ in {
     };
   };
 
+  imports = [ ./cassandra.nix ];
+
   config = mkIf cfg.enable {
-    cassandra.enable = true;
+
     services.zookeeper.enable = true;
+
     services.rabbitmq = {
       enable = true;
       listenAddress = "0.0.0.0";
@@ -54,6 +57,7 @@ in {
         [{rabbit, [{loopback_users, []}]}].
       '';
     };
+
     systemd.services.contrail-api = mkMerge [
       {
         after = [ "network.target" "cassandra.service" "rabbitmq.service" "zookeeper.service" ];
